@@ -1,0 +1,1 @@
+mvn archetype:generate -DarchetypeGroupId=io.cucumber  -DarchetypeArtifactId=cucumber-archetype -DarchetypeVersion=6.8.1 -DgroupId=mit.huyen -DartifactId=ten-project -Dpackage=mit.huyen -Dversion=1.0.0-SNAPSHOT -DinteractiveMode=false
