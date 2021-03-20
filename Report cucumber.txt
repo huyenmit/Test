@@ -50,7 +50,7 @@ https://stackoverflow.com/questions/51257224/maven-cucumber-reporting-plugin-is-
 	
 	3.
 	plugin ="json:target/cucumber.json"
-	4. Chayj commond: mvn clean
+	4. Chayj commond: mvn clean test
 	5. mnv verify -DskipTests
 	
 	
