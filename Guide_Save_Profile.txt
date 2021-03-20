@@ -1,0 +1,29 @@
+Bước 1:
+Tạo folder C:\chrome-dev-profile
+Bước 2:
+Copy shortcut của Chrome và paste vào folder C:\chrome-dev-profile
+Đổi tên file Chrome shortcut thành SELENIUM
+Bước 3:
+Right click vào file SELENIUM, chọn Properties -> Target
+Paste text: --user-data-dir=C:\chrome-dev-profile vào cuối
+Ví dụ: "C:\Users\HL2020\Downloads\GoogleChromePortable64\App\Chrome-bin\chrome.exe" --user-data-dir=C:\chrome-dev-profile
+Bước 4: Mở file SELENIUM
+Chọn Setting -> chọn On startup -> chọn Continue where you left off
+Bước 5: Truy cập link web cần test:
+Đăng nhập vào web -> đăng nhập thành công rồi tắt brower. (test lại bằng cách vào trang sau khi login).
+
+Bước 6:
+
+@Given("Start")
+public void uploadSample () {
+	System.setProperty("webdriver.chrome.driver", "C:\\Users\\HL2020\\Downloads\\chromedriver_win32\\chromedriver.exe");
+	ChromeOptions options = new ChromeOptions();
+	options.addArguments("user-data-dir=C:\\chrome-dev-profile"); // C:\\chrome-dev-profile là đường dẫn lưu file SELENIUM
+	options.addArguments("disable-infobars");
+	options.addArguments("--start-maximized");
+	driver = new ChromeDriver(options);
+}
+
+Bước 7:
+Sau khi chạy hết 1 case, cần quay trở về trang ban đầu sau login.
+Gọi lệnh driver.quit();
