@@ -1,0 +1,5 @@
+echo "starting script"
+cd /d D:\Projects\ama-automation
+mvn test -Dorg.slf4j.simpleLogger.defaultLogLevel=info -Dtest=RunCucumberTest_scanSample > reasult.txt 2>&1 && mvn verify -DskipTests
+echo "ending script"
+pause
