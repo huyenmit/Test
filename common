@@ -1,0 +1,52 @@
+package automation.test;
+
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.By;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.File;
+
+public class common {
+    public static WebDriver setting_browser(WebDriver driver){
+        System.setProperty("webdriver.chrome.driver", "D:\\SeleniumWebdriver\\New folder\\chromedriver_win32\\chromedriver.exe");
+        driver = new ChromeDriver();
+        return driver;
+    }
+
+    public static WebDriver login_ama(WebDriver driver) throws InterruptedException {
+            driver = setting_browser(driver);
+            driver.navigate().to("https://localhost:8443/#/login");
+            driver.manage().window().maximize();
+            driver.findElement(By.id("details-button")).click();
+            driver.findElement(By.id("proceed-link")).click();
+            driver.findElement(By.cssSelector("input[ng-reflect-name='username']")).sendKeys("huyenpt");
+            driver.findElement(By.cssSelector("input[type='password']")).sendKeys("Khanhngoc@123");
+            driver.findElement(By.id("btn-login")).click();
+            Thread.sleep(1000);
+            return driver;
+    }
+    public static WebDriver open_upload_screen(WebDriver driver) throws InterruptedException {
+        driver=login_ama(driver);
+        new WebDriverWait(driver, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href='#/upload']"))).click();
+        return driver;
+    }
+
+
+    public static void takeSnapShot(WebDriver driver, String fileName){
+        File screenshotFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+        File destFile= new File(fileName);
+        try{
+            FileUtils.copyFile(screenshotFile, destFile);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
+
+
+}
