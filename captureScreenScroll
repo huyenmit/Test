@@ -1,0 +1,25 @@
+public void takScreen(WebDriver driver) throws IOException {
+        JavascriptExecutor jexec = (JavascriptExecutor) driver;
+        boolean isScrollBarPresent = (boolean) jexec.executeScript("return document.documentElement.scrollHeight>document.documentElement.clientHeight");
+        long scrollHeight = (long) jexec.executeScript("return document.documentElement.scrollHeight");
+        long clientHeight = (long) jexec.executeScript("return document.documentElement.clientHeight");
+        int fileIndex = 1;
+        String test="aaa\\";
+        if (driver instanceof ChromeDriver) {
+            if (isScrollBarPresent) {
+                while (scrollHeight > 0) {
+                    File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                    FileUtils.copyFile(scrFile, new File("D:\\huyen\\" +test + fileIndex + ".png"));
+                    jexec.executeScript("window.scrollTo(0," + clientHeight * fileIndex++ + ")");
+                    scrollHeight = scrollHeight - clientHeight;
+                }
+            } else {
+                File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+                FileUtils.copyFile(scrFile, new File("D:\\huyen\\"+test  + fileIndex + ".png"));
+            }
+        } else {
+            File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
+            FileUtils.copyFile(scrFile, new File("D:\\huyen\\" +test   + fileIndex + ".png"));
+            // Combine all the .jpg file to single file
+
+        }
