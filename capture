@@ -1,0 +1,7 @@
+File screenshotFile = ((TakesScreenshot)driver).getScreenshotAs(OutputType.FILE);
+        File destFile= new File(fileName);
+        try{
+            FileUtils.copyFile(screenshotFile, destFile);
+        } catch (Exception e){
+            e.printStackTrace();
+        }
