@@ -1,0 +1,85 @@
+package automation.test;
+
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.File;
+import java.util.ArrayList;
+
+public class StepDefinition_uploadCheck {
+    static WebDriver driver_uploadSampleCheck;
+    private static boolean flag = false;
+    @Given("^User Login upload_Sample_check$")
+    public void userLogsIn_uploadSample() throws InterruptedException {
+        if(flag==false) {
+            flag=true;
+            driver_uploadSampleCheck = common.login_ama(driver_uploadSampleCheck);
+        }
+    }
+    @Then("Upload all sample")
+    public void upload_check() throws InterruptedException {
+        File folderUpload = new File("D:\\Download_default\\virus_huyenpt\\webshell_check\\asp");
+        File[] listOfFiles_actual = folderUpload.listFiles();
+
+        for (int i = 0; i < listOfFiles_actual.length; i++) {
+            new WebDriverWait(driver_uploadSampleCheck, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href='#/upload']"))).click();
+            String fileSample = "D:\\Download_default\\virus_huyenpt\\webshell_check\\asp\\" + listOfFiles_actual[i].getName();
+            Thread.sleep(2000);
+            driver_uploadSampleCheck.findElement(By.id("uploadFile")).sendKeys(fileSample);
+            Thread.sleep(1000);
+            driver_uploadSampleCheck.findElement(By.cssSelector("button[class^='btn-upload']")).click();
+            Thread.sleep(1000);
+            if(driver_uploadSampleCheck.findElements(By.cssSelector("button[class^='btn-rescan']")).size()==1){
+                driver_uploadSampleCheck.findElement(By.cssSelector("button[class^='btn-rescan']")).click();
+            }
+            String resultActual = new WebDriverWait(driver_uploadSampleCheck, 120).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#tab-summary .res__is-malware span"))).getText();
+            while ((resultActual == null) || (resultActual.equals("ANALYZING"))) {
+                Thread.sleep(1000);
+                resultActual = driver_uploadSampleCheck.findElement(By.cssSelector("#tab-summary .res__is-malware span")).getText();
+
+            }
+            String[] arr_moduleName_actual = new String[6];
+            String[] arr_moduleResult_actual = new String[6];
+            for (int j = 0; j < 6; j++) {
+                String element_moduleName = String.format("#tab-summary .module-result:nth-of-type(%d) span", j + 1);//Get module name
+                arr_moduleName_actual[j] = new WebDriverWait(driver_uploadSampleCheck, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_moduleName))).getText();
+                while (arr_moduleName_actual[j] == null) {
+                    arr_moduleName_actual[j] = driver_uploadSampleCheck.findElement(By.cssSelector(element_moduleName)).getText();
+
+                }
+                String element_resultTooltip = String.format("#tab-summary .module-result:nth-of-type(%d) i.fa", j + 1);//Get ket qua tooltip cua tung module
+                String[] arr_resultTooltip = new String[6];
+                arr_resultTooltip[j] = new WebDriverWait(driver_uploadSampleCheck, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_resultTooltip))).getAttribute("ng-reflect-ngb-tooltip");
+                while ((arr_resultTooltip[j] == null) || (arr_resultTooltip[j].equals("Analyzing"))) {
+                    Thread.sleep(2000);
+                    arr_resultTooltip[j] = new WebDriverWait(driver_uploadSampleCheck, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_resultTooltip))).getAttribute("ng-reflect-ngb-tooltip");
+                }
+
+                String element_moduleResult = String.format("#tab-summary .module-result:nth-of-type(%d) div.mres__malware-name span", j + 1);//Get malware name
+                if (arr_resultTooltip[j].equals("Malicious")) {
+                    arr_moduleResult_actual[j] = driver_uploadSampleCheck.findElement(By.cssSelector(element_moduleResult)).getText();
+                    while (arr_moduleResult_actual[j] == null) {
+                        new WebDriverWait(driver_uploadSampleCheck, 240).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_moduleResult))).click();
+                        arr_moduleResult_actual[j] = driver_uploadSampleCheck.findElement(By.cssSelector(element_moduleResult)).getText();
+                    }
+                } else {
+                    arr_moduleResult_actual[j] = "NoMalware";
+                }
+            }
+
+            //Tao mang 2 chieu get thong tin actual
+            String[][] moduleResult_actual = new String[6][2];
+            for (int m = 0; m < arr_moduleName_actual.length; m++) {
+                moduleResult_actual[m][0] = arr_moduleName_actual[m];
+                moduleResult_actual[m][1] = arr_moduleResult_actual[m];
+            }
+
+            System.out.println("|"+"i+1"+"|"+fileSample+"|"+"KASPERSKY,SANDBOX,VBASCANNER,BLACKLIST_SCAN_FILE,EMULATE,WEBSHELL"+"|"+resultActual+"|"+arr_moduleResult_actual[0]+","+arr_moduleResult_actual[1]+","+arr_moduleResult_actual[2]+","+arr_moduleResult_actual[3]+","+arr_moduleResult_actual[4]+","+arr_moduleResult_actual[5]);
+
+        }
+    }
+}
