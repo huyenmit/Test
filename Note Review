@@ -1,0 +1,35 @@
+- Chưa theo luồng Analy profile
+- Thêm cấu hình profile Analy tách riêng ra
+- Sửa lại time /1000
+- Viền checkbox bị mờ trên máy khác (check lại)
+=> khác nhau giữa Chrome và Firefox => update lại
+- Chuyển màu ngôn ngữ màu xanh
+- Lỗi message cảnh báo ở trích xuất và Replay khác nhau
+- Check lại thiết kế phần Mutilselect
+- Phần khung đang bị thiếu Pixel
+- Bỏ warning khi extracting or Replaying
+
+Profile phân tích
+- Tạo rule set theo requied của Seabank
+-  Phần Vlan update vẫn lên full alert
+- Check lại phần delicated
+
+ironPort
+- Bổ sung case ESG chết hăn-> không ping được hệ thống
+- Bổ sung thêm trường header để irontPort check
+
+1. Focus KH từng ngày
+1. Xác định goal của team trong daily 
+=> Đeicate US/task, tùy theo priority
+2, Xác định số lượng goal vừa đủ trong ngày
+3, cá nhân chủ động xác định goal của mình
+=> 2.3 Cá nhân commit lại hoàn thành bao nhiêu goal/ngày trước team
+
+2. Tăng tỷ lệ done goal
+1. Số lượng goal: 5/sprint-> po
+2. <= 2US/goal-< po
+3. Inspet goal daily bằng bảng vật lý
+4. Review ánh xạ goal và Roadmap => po
+5. Scope số lượng goal (nếu nhiều phát sinh)-> po
+6. Keep các event-> sm
+7. 1 ngày tối đa 2 goal-> dev team
