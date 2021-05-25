@@ -1,13 +1,20 @@
-package automation.test;
+package test;
 
 import org.apache.commons.io.FileUtils;
 import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardOpenOption;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -15,7 +22,8 @@ import java.util.Map;
 import java.util.Properties;
 
 public class common {
-    public static WebDriver login_ama(WebDriver driver) throws InterruptedException {
+    public static WebDriver login_ama(WebDriver driver) throws InterruptedException, IOException {
+        //Read file properties
         Properties properties = new Properties();
         try {
             properties.load(new FileInputStream("Config.properties"));
@@ -25,15 +33,36 @@ public class common {
         String dName = properties.getProperty("driverName");
         String dUrl = properties.getProperty("driverUrl");
         String url = properties.getProperty("urlLogin");
+        String uName = properties.getProperty("userName");
+        String pwd = properties.getProperty("password");
+        String url_Download = properties.getProperty("url_Download");
         System.setProperty(dName, dUrl);
-        driver = new ChromeDriver();
+
+        //Check exit folder download
+        File f = new File(url_Download);
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+
+        //Setting duong dan download default
+        String downloadFilepath = url_Download;
+        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+        chromePrefs.put("profile.default_content_settings.popups", 0);
+        chromePrefs.put("download.default_directory", downloadFilepath);
+        ChromeOptions options = new ChromeOptions();
+        options.setExperimentalOption("prefs", chromePrefs);
+        DesiredCapabilities cap = DesiredCapabilities.chrome();
+        cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+        cap.setCapability(ChromeOptions.CAPABILITY, options);
+        driver = new ChromeDriver(cap);
+
+        //Open link url
         driver.navigate().to(url);
         driver.manage().window().maximize();
         driver.findElement(By.id("details-button")).click();
         driver.findElement(By.id("proceed-link")).click();
 
-        String uName = properties.getProperty("userName");
-        String pwd = properties.getProperty("password");
+        //input user, pass
         driver.findElement(By.cssSelector("input[name='username']")).sendKeys(uName);
         driver.findElement(By.cssSelector("input[type='password']")).sendKeys(pwd);
         driver.findElement(By.id("btn-login")).click();
@@ -41,7 +70,37 @@ public class common {
         return driver;
     }
 
+    public static void writeLog(String text) throws IOException {
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream("Config.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String urlLog = properties.getProperty("urlLog");
+
+        File f= new File(urlLog + "log.txt");
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");
+        LocalDateTime now = LocalDateTime.now();
+        Files.write(Paths.get(urlLog+ "log.txt"), (dtf.format(now) + "  " + text + "\r\n").getBytes(), StandardOpenOption.APPEND);
+    }
+
     public static void takeSnapShot(WebDriver driver, String folderName, String _case_) throws IOException {
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream("Config.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String forderCapture = properties.getProperty("capture");
+        File f = new File(folderName);
+        if (!f.exists()) {
+            f.createNewFile();
+        }
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy_MM_dd");
         LocalDateTime now = LocalDateTime.now();
         JavascriptExecutor jexec = (JavascriptExecutor) driver;
@@ -53,19 +112,20 @@ public class common {
             if (isScrollBarPresent) {
                 while (scrollHeight > 0) {
                     File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-                    FileUtils.copyFile(scrFile, new File("D:\\AutoAMA\\" + folderName+"\\"+ dtf.format(now)+"\\"+ _case_+"_"+ fileIndex + ".png"));
+                    FileUtils.copyFile(scrFile, new File(forderCapture + folderName + "\\" + dtf.format(now) + "\\" + _case_ + "_" + fileIndex + ".png"));
                     jexec.executeScript("document.getElementById('default-layout').scrollTo(0," + clientHeight * fileIndex++ + ")");
                     scrollHeight = scrollHeight - clientHeight;
                 }
             } else {
                 File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-                FileUtils.copyFile(scrFile, new File("D:\\AutoAMA\\" + folderName+"\\"+ dtf.format(now)+"\\"+ _case_+"_"+ fileIndex + ".png"));
+                FileUtils.copyFile(scrFile, new File(forderCapture + folderName + "\\" + dtf.format(now) + "\\" + _case_ + "_" + fileIndex + ".png"));
             }
         } else {
             File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-            FileUtils.copyFile(scrFile, new File("D:\\AutoAMA\\" + folderName+"\\"+ dtf.format(now)+"\\"+ _case_+"_"+ fileIndex + ".png"));
+            FileUtils.copyFile(scrFile, new File(forderCapture + folderName + "\\" + dtf.format(now) + "\\" + _case_ + "_" + fileIndex + ".png"));
         }
     }
+
     public static void input_Calender(WebDriver driver, String date) throws InterruptedException {
         Map<String, String> date_English = new HashMap<String, String>() {{
             put("Jan", "1");
@@ -154,4 +214,3 @@ public class common {
         return;
     }
 }
-
