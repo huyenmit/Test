@@ -1,5 +1,6 @@
-package automation.test;
+package test;
 
+import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
@@ -9,97 +10,130 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 
 public class StepDefinitions_scanSample {
     static WebDriver driver_uploadSample;
     private static boolean flag = false;
-    WebDriverWait wait;
-    String sha1;
-    String _case;
+    String folderName = "scanSample";
+    String _case_;
+    String fileSample_;
     //Map module va element module
     Map<String, String> module_list_elm = new HashMap<String, String>() {{
-//        put("KASPERSKY", "button[class^='ng-tns-c177-1 btn w-100 text-left text-light btn-toggle-db_scan_k']");
-//        put("EMULATE", "button[class^='ng-tns-c177-1 btn w-100 text-left text-light btn-toggle-emulate']");
-//        put("VBASCANNER", "button[class^='ng-tns-c177-1 btn w-100 text-left text-light btn-toggle-vbascanner']");
-//        put("SANDBOX", "button[class^='ng-tns-c177-1 btn w-100 text-left text-light btn-toggle-sandbox']");
-//        put("BLACKLIST_SCAN_FILE", "button[class^='ng-tns-c177-1 btn w-100 text-left text-light btn-toggle-blacklist_scan_file']");
-//        put("WEBSHELL", "button[class^='ng-tns-c177-1 btn w-100 text-left text-light btn-toggle-webshell']");
-        put("KASPERSKY", "button[class*='btn w-100 text-left text-light btn-toggle-db_scan_k']");
-        put("EMULATE", "button[class*='btn w-100 text-left text-light btn-toggle-emulate']");
-        put("VBASCANNER", "button[class*='btn w-100 text-left text-light btn-toggle-vbascanner']");
-        put("SANDBOX", "button[class*='btn w-100 text-left text-light btn-toggle-sandbox']");
-        put("BLACKLIST_SCAN_FILE", "button[class*='btn w-100 text-left text-light btn-toggle-blacklist_scan_file']");
-        put("WEBSHELL", "button[class*='btn w-100 text-left text-light btn-toggle-webshell']");
+        put("KASPERSKY", "button[class*='btn-toggle-db_scan_k']");
+        put("EMULATE", "button[class*='btn-toggle-emulate']");
+        put("VBA", "button[class*='btn-toggle-vbascanner']");
+        put("SANDBOX", "button[class*='btn-toggle-sandbox']");
+        put("BLACKLIST", "button[class*='btn-toggle-blacklist_scan_file']");
+        put("WEBSHELL", "button[class*='btn-toggle-webshell']");
+        put("DISASSEMBLY", "button[class*='btn-toggle-disassembly']");
+        put("REPUTATION", "button[class*='btn-toggle-reputation_sample']");
+        put("CFG", "button[class*='btn-toggle-cfg']");
     }};
 
     String[] moduleName;
-    String resultExpect;
+    String resultActual;
+
     @Given("^User Logs In_scanSample$")
-    public void userLogsIn_scanSample() throws InterruptedException {
-        if(flag==false) {
-            flag=true;
+    public void userLogsIn_scanSample() throws InterruptedException, IOException {
+        if (flag == false) {
+            flag = true;
             driver_uploadSample = common.login_ama(driver_uploadSample);
         }
     }
-    @When("^Upload file as \"([^\"]*)\" and \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\"$")
-    public void scan_Sample(String _case, String fileSample, String choose_moduleName, String result) throws InterruptedException {
-        //Tao mang 1 chieu cho choose_moduleName
-        moduleName = choose_moduleName.split(",");
-        fileSample = "D:\\Download_default\\virus_huyenpt\\" + fileSample;
 
-        //Upload file de scan
-        new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href='#/upload']"))).click();
-        Thread.sleep(5000);
-        driver_uploadSample.findElement(By.id("uploadFile")).sendKeys(fileSample);
-        new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.xpath("//div/div/button[@id='btn-select-scan-modules']"))).click();
+    @When("^Upload file as \"([^\"]*)\" and \"([^\"]*)\", \"([^\"]*)\"$")
+    public void scan_Sample(String _case, String fileSample, String choose_moduleName) throws InterruptedException, IOException {
+        try {
+            fileSample_ = fileSample;
+            Properties properties = new Properties();
+            try {
+                properties.load(new FileInputStream("Config.properties"));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            String url_file = properties.getProperty("urlFileSample");
+            _case_ = _case;
+            fileSample = url_file + fileSample;
 
-        //Clear all module da chon de scan
-        for (Map.Entry<String, String> module : module_list_elm.entrySet()) {
-            Thread.sleep(500);
-            new WebDriverWait(driver_uploadSample, 30).until(ExpectedConditions.elementToBeClickable(By.cssSelector(module.getValue()))).click();
+            //Tao mang 1 chieu cho choose_moduleName
+            moduleName = choose_moduleName.split(",");
+
+            //Upload file de scan
+            new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href='#/upload']"))).click();
+            while (driver_uploadSample.findElements(By.cssSelector("input[id='uploadFile']")).size() == 0) {
+                Thread.sleep(1000);
+            }
+            driver_uploadSample.findElement(By.cssSelector("input[id='uploadFile']")).sendKeys(fileSample);
+            new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.xpath("//button[@id='btn-select-scan-modules']"))).click();
+
+            //Clear all module da chon de scan
+            driver_uploadSample.findElement(By.xpath("//div/button/span")).click();
+//            for (Map.Entry<String, String> module : module_list_elm.entrySet()) {
+//                while (driver_uploadSample.findElements(By.cssSelector(module.getValue())).size() == 0) {
+//                    Thread.sleep(500);
+//                    driver_uploadSample.findElements(By.cssSelector(module.getValue())).size();
+//                }
+//                driver_uploadSample.findElement(By.cssSelector(module.getValue())).click();
+//            }
+
+            //Chon module can scanresultActual
+            for (int i = 0; i < moduleName.length; i++) {
+                while (driver_uploadSample.findElements(By.cssSelector(module_list_elm.get(moduleName[i]))).size() == 0) {
+                    Thread.sleep(1000);
+                    driver_uploadSample.findElements(By.cssSelector(module_list_elm.get(moduleName[i]))).size();
+                }
+                driver_uploadSample.findElement(By.cssSelector(module_list_elm.get(moduleName[i]))).click();
+
+            }
+            //Chon upload va chon rescan
+            new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[class^='btn-upload']"))).click();
+            Thread.sleep(5000);
+            if (driver_uploadSample.findElements(By.cssSelector("button[class^='btn-rescan']")).size() == 1) {
+                driver_uploadSample.findElement(By.cssSelector("button[class^='btn-rescan']")).click();
+            }
+        } catch (Exception e) {
+            common.writeLog(e.toString());
         }
-
-        //Chon module can scan
-        for (int i = 0; i < moduleName.length; i++) {
-            Thread.sleep(500);
-            new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(module_list_elm.get(moduleName[i])))).click();
-        }
-        //Chon upload va chon rescan
-        new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[class^='btn-upload']"))).click();
-        new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("button[class^='btn-rescan btn btn-primary mr-3']"))).click();
-
-        //Get ket qua module ket luan
-        new WebDriverWait(driver_uploadSample, 120).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#tab-summary .res__is-malware span"))).getText();
-        while ((resultExpect == null) || (resultExpect.equals("ANALYZING"))) {
-            Thread.sleep(1000);
-            resultExpect = driver_uploadSample.findElement(By.cssSelector("#tab-summary .res__is-malware span")).getText();
-        }
-        sha1 = driver_uploadSample.findElement(By.cssSelector("#tab-summary .rp__sha1 span")).getText();
-
-        //Compare ket qua
-        if (!resultExpect.equals(result)) {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-            LocalDateTime now = LocalDateTime.now();
-            common.takeSnapShot(driver_uploadSample, "D:\\AutoAMA\\sample\\" + _case + "_" + dtf.format(now) + ".png");
-        }
-        Assert.assertEquals(result, resultExpect);
     }
 
+    @Then("^Result analysis sample \"([^\"]*)\"$")
+    public void result_Analyze(String resultExpected) throws InterruptedException, IOException {
+        //Get ket qua module ket luan
+        resultActual = new WebDriverWait(driver_uploadSample, 120).until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#tab-summary .res__is-malware span"))).getText();
+        while ((resultActual == null) || (resultActual.equals("ANALYZING"))) {
+            Thread.sleep(1000);
+            resultActual = driver_uploadSample.findElement(By.cssSelector("#tab-summary .res__is-malware span")).getText();
+        }
 
-    @Then("^Result analysis with \"([^\"]*)\"$")
-    public void result_Analyze(String malwareName) throws InterruptedException {
+        //Compare ket qua
+        if (!resultActual.equals(resultExpected)) {
+            common.takeSnapShot(driver_uploadSample, folderName, _case_);
+            common.writeLog("Result scan: expected:" + "<" + resultExpected + "> but was:<" + resultActual + ">");
+        }
+
+        Assert.assertEquals(resultExpected, resultActual);
+    }
+
+    @And("^Result analysis sample with module \"([^\"]*)\"$")
+    public void result_Analyze_Module(String malwareName) throws InterruptedException, IOException {
         //Tao mang 1 chieu luu ket qua cua tung module
         String[] arr_moduleResult = malwareName.split(",");
 
         //Tao mang 2 chieu thong tin expected
         String[][] moduleName_ = new String[moduleName.length][2];
+        String[] malwareName_Sandbox = null;
         for (int i = 0; i < moduleName.length; i++) {
             moduleName_[i][0] = moduleName[i];
             moduleName_[i][1] = arr_moduleResult[i];
+            //Tao list expected ma doc sandbox
+            if (moduleName_[i][0].equals("SANDBOX")) {
+                malwareName_Sandbox = arr_moduleResult[i].split(":");
+            }
         }
 
         ///Get thong tin actual roi cho vao mang 1 chieu
@@ -114,14 +148,14 @@ public class StepDefinitions_scanSample {
             }
             String element_resultTooltip = String.format("#tab-summary .module-result:nth-of-type(%d) i.fa", j + 1);//Get ket qua tooltip cua tung module
             String[] arr_resultTooltip = new String[moduleName.length];
-            arr_resultTooltip[j] = new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_resultTooltip))).getAttribute("ng-reflect-ngb-tooltip");
-            while ((arr_resultTooltip[j] == null) || (arr_resultTooltip[j].equals("Analyzing"))) {
+            arr_resultTooltip[j] = new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_resultTooltip))).getAttribute("class");
+            while ((arr_resultTooltip[j] == null) || (arr_resultTooltip[j].equals("fa fa-info-circle text-warning"))) {
                 Thread.sleep(2000);
-                arr_resultTooltip[j] = new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_resultTooltip))).getAttribute("ng-reflect-ngb-tooltip");
+                arr_resultTooltip[j] = new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_resultTooltip))).getAttribute("class");
             }
 
             String element_moduleResult = String.format("#tab-summary .module-result:nth-of-type(%d) div.mres__malware-name span", j + 1);//Get malware name
-            if (arr_resultTooltip[j].equals("Malicious")) {
+            if (arr_resultTooltip[j].equals("fa fa-exclamation-triangle text-danger")) {
                 arr_moduleResult_actual[j] = driver_uploadSample.findElement(By.cssSelector(element_moduleResult)).getText();
                 while (arr_moduleResult_actual[j] == null) {
                     new WebDriverWait(driver_uploadSample, 240).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_moduleResult))).click();
@@ -141,25 +175,69 @@ public class StepDefinitions_scanSample {
 
         //Compare  2 mang 2 chieu expected và actual
         int count = 0;
-        for (int i = 0; i < moduleName.length; i++)
-            for (int j = 0; j < moduleResult_actual.length; j++) {
-                Thread.sleep(100);
-                if ((moduleName_[i][0].trim().equals(moduleResult_actual[j][0])) && (!moduleName_[i][1].trim().equals(moduleResult_actual[j][1]))) {
-                    count++;
-                    if (count != 0) {
-                        System.out.println(" moduleName[i][0] actual=" + moduleName_[i][0]);
-                        System.out.println("moduleResult_actual[j][0] actual=" + moduleResult_actual[j][0]);
-                        System.out.println("moduleName[i][0] expected=" + moduleName_[i][1]);
-                        System.out.println("moduleResult_actual[j][0] expected=" + moduleResult_actual[j][1]);
+        for (int i = 0; i < moduleName.length; i++) {
+            if (moduleResult_actual[i][0].equals("SANDBOX")) {
+                for (int j = 0; j < malwareName_Sandbox.length; j++) {
+                    if (moduleResult_actual[i][1].trim().equals(malwareName_Sandbox[j])) {
+                        count = 0;
+                        break;
+                    } else count++;
+                }
+                if (count != 0) {
+                    common.writeLog("Malware name Sandbox:" + "expected:" + "<" + arr_moduleResult[i] + "> but was:<" + moduleResult_actual[i][1] + ">");
+                }
+
+            } else {
+                for (int j = 0; j < moduleResult_actual.length; j++) {
+                    Thread.sleep(100);
+                    if ((moduleName_[i][0].trim().equals(moduleResult_actual[j][0])) && (!moduleName_[i][1].trim().equals(moduleResult_actual[j][1]))) {
+                        count++;
+                        if (count != 0) {
+                            common.writeLog("Sample file:" + fileSample_);
+                            common.writeLog("Module name:" + "expected:" + "<" + moduleName_[i][0] + "> but was:<" + moduleResult_actual[j][0] + ">");
+                            common.writeLog("Module name result scan:" + "expected:" + "<" + moduleName_[i][1] + "> but was:<" + moduleResult_actual[j][1] + ">");
+                        }
                     }
                 }
             }
+        }
         if (count != 0) {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-            LocalDateTime now = LocalDateTime.now();
-            common.takeSnapShot(driver_uploadSample, "D:\\AutoAMA\\sample\\" + _case + "_" + dtf.format(now) + ".png");
+            common.takeSnapShot(driver_uploadSample, folderName, _case_);
         }
         Assert.assertEquals(0, count);
+
+    }
+
+    @And("Number sandbox scan with \"([^\"]*)\"$")
+    public void count_sandbox(String numberSandbox) throws InterruptedException, IOException {
+        int countSandbox = 0;
+        String[] modulename = new String[moduleName.length];
+        for (int j = 0; j < moduleName.length; j++) {
+            String element_moduleName = String.format("#tab-summary .module-result:nth-of-type(%d) span", j + 1);//Get module name
+            modulename[j] = new WebDriverWait(driver_uploadSample, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector(element_moduleName))).getText();
+            while (modulename[j] == null) {
+                modulename[j] = driver_uploadSample.findElement(By.cssSelector(element_moduleName)).getText();
+            }
+            if (modulename[j].equals("SANDBOX")) {
+                String time_elm = String.format("#tab-summary .module-result:nth-of-type(%d) li  span", j + 1);
+                if (driver_uploadSample.findElement(By.cssSelector(time_elm)).getText() != null) {
+                    for (int i = 0; i < Integer.parseInt(numberSandbox); i++) {
+                        Thread.sleep(1000);
+                        String sandbox_elm = String.format("div[class*='mres__sandbox-list'] div[class*='property-value'] button:nth-of-type(%d)", i + 1);
+                        String sandboxText_elm = String.format("div[class*='mres__sandbox-list'] div[class*='property-value'] button:nth-of-type(%d) span", i + 1);
+                        if (driver_uploadSample.findElements(By.cssSelector(sandbox_elm)).size() == 1) {
+                            countSandbox++;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+        if (countSandbox != Integer.parseInt(numberSandbox)) {
+            common.takeSnapShot(driver_uploadSample, folderName, _case_);
+            common.writeLog("Number sandbox: expected:" + "<" + Integer.parseInt(numberSandbox) + "> but was:<" + countSandbox + ">");
+        }
+        Assert.assertEquals(Integer.parseInt(numberSandbox), countSandbox);
     }
 
 }
