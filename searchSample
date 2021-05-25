@@ -1,4 +1,4 @@
-package automation.test;
+package test;
 
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -11,8 +11,6 @@ import org.openqa.selenium.WebDriver;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 
@@ -21,59 +19,42 @@ public class StepDefinitions_searchSample {
     static boolean flag;
     String name_expected;
     String sha1_expected;
-    String md5_expected;
     String result_expected;
     String dateFrom_expected;
     String dateTo_expected;
+    String folderName = "searchSample";
     String _case_;
-    int n;
-    Map<String, String> date_English = new HashMap<String, String>() {{
-        put("Jan", "1");
-        put("Feb", "2");
-        put("Mar", "3");
-        put("Apr", "4");
-        put("May", "5");
-        put("Jun", "6");
-        put("Jul", "7");
-        put("Aug", "8");
-        put("Sep", "9");
-        put("Oct", "10");
-        put("Nov", "11");
-        put("Dec", "12");
-
-    }};
+    String result_Number_actual;
 
     @Given("^User Logs In_searchSample$")
-    public void userLogsIn_searchSample() throws InterruptedException {
-        if(flag==false) {
-            flag=true;
+    public void userLogsIn_searchSample() throws InterruptedException, IOException {
+        if (flag == false) {
+            flag = true;
             driver_searchSample = common.login_ama(driver_searchSample);
         }
     }
-    @When("^input condition with \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\" and \"([^\"]*)\"$")
-    public void seachSample(String _case, String dateFrom, String dateTo, String name, String sha1, String md5, String result) throws InterruptedException, IOException {
+
+    @When("^input condition sample with \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\", \"([^\"]*)\" and \"([^\"]*)\"$")
+    public void seachSample(String _case, String dateFrom, String dateTo, String name, String sha1, String result) throws InterruptedException, IOException {
         //Open lai man hinh sample de clear
         driver_searchSample.findElement(By.cssSelector("a[href='#/urls']")).click();
         driver_searchSample.findElement(By.cssSelector("a[href='#/samples']")).click();
 
         //Add ten dieu kien search vào list
-        _case_=_case;
+        _case_ = _case;
         List<String> condition_name = new ArrayList<>();
         condition_name.add("name");
         condition_name.add("sha1");
-        condition_name.add("md5");
 
         //Them value dieu kien search
         List<String> condition_value = new ArrayList<>();
         condition_value.add(name);
         condition_value.add(sha1);
-        condition_value.add(md5);
 
         dateFrom_expected = dateFrom;
         dateTo_expected = dateTo;
         name_expected = name;
         sha1_expected = sha1;
-        md5_expected = md5;
         result_expected = result;
 
 
@@ -81,19 +62,19 @@ public class StepDefinitions_searchSample {
         Thread.sleep(2000);
         if (!dateFrom.isEmpty()) {
             driver_searchSample.findElement(By.xpath("//form/div[1]/span")).click();
-            input_Calender(dateFrom);
+            common.input_Calender(driver_searchSample, dateFrom);
             //Click button Set
             driver_searchSample.findElement(By.xpath("//owl-date-time-container/div/div/button[2]")).click();
         }
 
         if (!dateTo.isEmpty()) {
             driver_searchSample.findElement(By.xpath("//form/div[2]/span")).click();
-            input_Calender(dateTo);
+            common.input_Calender(driver_searchSample, dateTo);
             //Click button Set
             driver_searchSample.findElement(By.xpath("//owl-date-time-container/div/div/button[2]")).click();
         }
 
-        //Input thong tin name, sha1,md5, result
+        //Input thong tin name, sha1, result
         for (int i = 0; i < condition_name.size(); i++) {
             Thread.sleep(500);
             String name_element = String.format("input[formcontrolname='%s']", condition_name.get(i));
@@ -102,189 +83,113 @@ public class StepDefinitions_searchSample {
         }
         if (!result.isEmpty()) {
             driver_searchSample.findElement(By.cssSelector("ng-select[formcontrolname='malware']")).click();
-            String result_element = String.format("//ng-dropdown-panel//span[@ng-reflect-ng-item-label='%s']", result);
+            String result_element = String.format("//ng-dropdown-panel//*[contains(text(), '%s')]", result);
             driver_searchSample.findElement(By.xpath(result_element)).click();
+
         }
         Thread.sleep(2000);
         driver_searchSample.findElement(By.cssSelector("button[class*='btn-search']")).click();
     }
 
-    public void input_Calender(String date) throws InterruptedException, IOException {
-        String dateFrom_yyyy_MM_dd[] = (date.split(" ")[0]).split("-");
-        String dateFrom_HH_mm_ss[] = (date.split(" ")[1]).split(":");
-        driver_searchSample.findElement(By.xpath("//button[@aria-label='Choose month and year']")).click();
-        boolean stop_month = false;
-        for (int i = 0; i < 7; i++) {
-            for (int j = 0; j < 3; j++) {
-                String year_from_elm = String.format("//owl-date-time-multi-year-view//tbody//tr[%d]/td[%d]/span", i + 1, j + 1);
-                String year_from = driver_searchSample.findElement(By.xpath(year_from_elm)).getText();
-                if (year_from.equals(dateFrom_yyyy_MM_dd[0])) {
-                    driver_searchSample.findElement(By.xpath(year_from_elm)).click();
-                    stop_month = true;
-                    break;
-                }
-            }
-            if (stop_month == true) {
-                break;
-            }
-        }
-        //Chon thong tin month
-        String month_from;
-        for (int i = 0; i < 4; i++) {
-            for (int j = 0; j < 3; j++) {
-                String month_from_elm = String.format("//owl-date-time-year-view//tbody/tr[%d]/td[%d]/span", i + 1, j + 1);
-                month_from = driver_searchSample.findElement(By.xpath(month_from_elm)).getText();
-                for (Map.Entry<String, String> date_E : date_English.entrySet()) {
-                    if (month_from.equals(date_E.getKey())) {
-                        month_from = date_E.getValue();
-                        break;
-                    }
-                }
-                if (Integer.parseInt(month_from) == (Integer.parseInt(dateFrom_yyyy_MM_dd[1]))) {
-                    driver_searchSample.findElement(By.xpath(month_from_elm)).click();
-                    stop_month = true;
-                    break;
-                }
-            }
-            if (stop_month == true) {
-                break;
-            }
-        }
-        //Chon thong tin day
-        boolean stop_day = false;
-        for (int i = 0; i < 6; i++) {
-            for (int j = 0; j < 7; j++) {
-                String day_from_elm = String.format("//owl-date-time-month-view//tbody/tr[%d]/td[%d]/span", i + 1, j + 1);
-                String day_from = driver_searchSample.findElement(By.xpath(day_from_elm)).getText();
-                String day_from_class = driver_searchSample.findElement(By.xpath(day_from_elm)).getAttribute("class");
-                if (day_from_class.equals("owl-dt-calendar-cell-content owl-dt-calendar-cell-out")) {
-                    continue;
-                } else {
-                    if (day_from.equals(dateFrom_yyyy_MM_dd[2])) {
-                        driver_searchSample.findElement(By.xpath(day_from_elm)).click();
-                        stop_day = true;
-                        break;
-                    }
-                }
-            }
-            if (stop_day == true) {
-                break;
-            }
-        }
-        //Input HH:mm:ss
-        driver_searchSample.findElement(By.xpath("//owl-date-time-timer/owl-date-time-timer-box[1]//input")).clear();
-        driver_searchSample.findElement(By.xpath("//owl-date-time-timer/owl-date-time-timer-box[1]//input")).sendKeys(dateFrom_HH_mm_ss[0]);
-        driver_searchSample.findElement(By.xpath("//owl-date-time-timer/owl-date-time-timer-box[2]//input")).clear();
-        driver_searchSample.findElement(By.xpath("//owl-date-time-timer/owl-date-time-timer-box[2]//input")).sendKeys(dateFrom_HH_mm_ss[1]);
-        driver_searchSample.findElement(By.xpath("//owl-date-time-timer/owl-date-time-timer-box[3]//input")).clear();
-        driver_searchSample.findElement(By.xpath("//owl-date-time-timer/owl-date-time-timer-box[3]//input")).sendKeys(dateFrom_HH_mm_ss[2]);
-        Thread.sleep(300);
 
+    @Then("^Check result number sample with \"([^\"]*)\"$")
+    public void check_result_number(String result_Number_expected) throws InterruptedException, IOException {
+        int n;
+            Thread.sleep(5000);
+            n = Integer.parseInt(result_Number_expected);
+            String result_Number_actual1 = driver_searchSample.findElement(By.cssSelector("div[class*='total-count'] span")).getText();
+            result_Number_actual=result_Number_actual1;
+            if (Integer.parseInt(result_Number_actual) != n) {
+                common.takeSnapShot(driver_searchSample,folderName, _case_);
+                common.writeLog("Result number search sample: expected:" + "<"+ n+"> but was:<"+ result_Number_actual +">");
+            }
+            Assert.assertEquals(n, Integer.parseInt(result_Number_actual));
     }
 
-    @Then("^Check result number with \"([^\"]*)\"$")
-    public void check_result_number(String result_Number_expected) throws InterruptedException {
-        Thread.sleep(5000);
-        n = Integer.parseInt(result_Number_expected);
-        String result_Number_actual = driver_searchSample.findElement(By.xpath("//div[@class='total-count col-md-3 mt-3']/span")).getText();
-        if (n == 0) {
-            Assert.assertEquals(0, Integer.parseInt(result_Number_actual));
-        } else {
-            Assert.assertEquals(Integer.parseInt(result_Number_actual), n);
-        }
-    }
+    @And("Check result sample")
+    public void result_Search() throws ParseException, InterruptedException, IOException {
+            Thread.sleep(5000);
+            if (Integer.parseInt(result_Number_actual) != 0) {
+                int number = 0;
+                int count_record = 0;
+                int page = Integer.parseInt(result_Number_actual) / 10 + 1;
+                boolean stop = false;
+                for (int i = 0; i < page; i++) {
+                    Thread.sleep(2000);
+                    for (int m =0; m < 10; m++) {
+                        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+                        if (!dateFrom_expected.isEmpty()) {
+                            String result_date_elm = String.format("//tbody/tr[%d]/td[2]/ngb-highlight", m + 1);
+                            String result_date = driver_searchSample.findElement(By.xpath(result_date_elm)).getText();
 
-    @And("Check result")
-    public void result_Search() throws ParseException, InterruptedException {
-        Thread.sleep(5000);
-        if (n != 0) {
-            int number = 0;
-            int count_record = 0;
-            int page = n / 10 +1 ;
-            boolean stop=false;
-            for(int i=0; i< page; i++) {
-                Thread.sleep(2000);
-                for (int m = 0; m < 10; m++) {
-                    SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-                    if (!dateFrom_expected.isEmpty()) {
-                        String result_date_elm = String.format("//tbody/tr[%d]/td[2]/ngb-highlight", m + 1);
-                        String result_date = driver_searchSample.findElement(By.xpath(result_date_elm)).getAttribute("ng-reflect-result");
-                        //Convert date
-                        Date dateFrom_expected_fm = format.parse(dateFrom_expected);
-                        long dateFrom_expected_covert = dateFrom_expected_fm.getTime();
-                        Date result_date_fm = format.parse(result_date);
-                        long result_date_covert = result_date_fm.getTime();
-                        if (result_date_covert < dateFrom_expected_covert) {
-                            number++;
-                            System.out.println("Date actual: " + result_date + "Date from expected:" + dateFrom_expected);
-                        }
-                    }
-                    if (!dateTo_expected.isEmpty()) {
-                        Thread.sleep(1000);
-                        String result_date_elm = String.format("//tbody/tr[%d]/td[2]/ngb-highlight", m + 1);
-                        String result_date = driver_searchSample.findElement(By.xpath(result_date_elm)).getAttribute("ng-reflect-result");
-                        //Convert date
-                        Date dateTo_expected_fm = format.parse(dateTo_expected);
-                        long dateTo_expected_covert = dateTo_expected_fm.getTime();
-                        Date result_date_fm = format.parse(result_date);
-                        long result_date_covert = result_date_fm.getTime();
-                        if (result_date_covert > dateTo_expected_covert) {
-                            number++;
-                            System.out.println("Date actual: " + result_date + "Date to expected:" + dateTo_expected);
-                        }
-                    }
-                    if (!name_expected.isEmpty()) {
-                        String result_name_elm = String.format("//tbody/tr[%d]/td[3]/ngb-highlight", m + 1);
-                        String result_name = driver_searchSample.findElement(By.xpath(result_name_elm)).getText();
-                        if (!result_name.contains(name_expected)) {
-                            number++;
-                            System.out.println("Name actual: " + result_name + " Name expected:" + name_expected);
-                        }
+                            //Convert date
+                            Date dateFrom_expected_fm = format.parse(dateFrom_expected);
+                            long dateFrom_expected_covert = dateFrom_expected_fm.getTime();
+                            Date result_date_fm = format.parse(result_date);
+                            long result_date_covert = result_date_fm.getTime();
+                            if (result_date_covert < dateFrom_expected_covert) {
+                                number++;
+                                    common.writeLog(" Date:" + "expected:" + "<" + dateFrom_expected + "> but was:<" + result_date + ">");
 
-                    }
-                    if (!sha1_expected.isEmpty()) {
-                        String result_sha1_elm = String.format("//tbody/tr[%d]/td[4]/ngb-highlight", m + 1);
-                        String result_sha1 = driver_searchSample.findElement(By.xpath(result_sha1_elm)).getText();
-                        if (!result_sha1.contains(sha1_expected)) {
-                            number++;
-                            System.out.println("Sha1 actual: " + result_sha1 + "  Sha1 expected:" + sha1_expected);
+                            }
                         }
-                    }
-                    if (!md5_expected.isEmpty()) {
-                        String result_md5_elm = String.format("//tbody/tr[%d]/td[5]/ngb-highlight", m + 1);
-                        String result_md5 = driver_searchSample.findElement(By.xpath(result_md5_elm)).getText();
-                        if (!result_md5.contains(md5_expected)) {
-                            number++;
-                            System.out.println("Md5 actual: " + result_md5 + "  Md5 expected:" + md5_expected);
+                        if (!dateTo_expected.isEmpty()) {
+                            Thread.sleep(1000);
+                            String result_date_elm = String.format("//tbody/tr[%d]/td[2]/ngb-highlight", m + 1);
+                            String result_date = driver_searchSample.findElement(By.xpath(result_date_elm)).getText();
+                            //Convert date
+                            Date dateTo_expected_fm = format.parse(dateTo_expected);
+                            long dateTo_expected_covert = dateTo_expected_fm.getTime();
+                            Date result_date_fm = format.parse(result_date);
+                            long result_date_covert = result_date_fm.getTime();
+                            if (result_date_covert > dateTo_expected_covert) {
+                                number++;
+                                common.writeLog(" Date:" + "expected:" + "<" + dateTo_expected + "> but was:<" + result_date + ">");
+                            }
+                        }
+                        if (!name_expected.isEmpty()) {
+                            String result_name_elm = String.format("//tbody/tr[%d]/td[3]/ngb-highlight", m + 1);
+                            String result_name = driver_searchSample.findElement(By.xpath(result_name_elm)).getText();
+                            if (!result_name.contains(name_expected)) {
+                                number++;
+                                common.writeLog(" Name sample:" + "expected:" + "<" + name_expected + "> but was:<" + result_name + ">");
+                            }
+
+                        }
+                        if (!sha1_expected.isEmpty()) {
+                            String result_sha1_elm = String.format("//tbody/tr[%d]/td[4]/ngb-highlight", m + 1);
+                            String result_sha1 = driver_searchSample.findElement(By.xpath(result_sha1_elm)).getText();
+                            if (!result_sha1.contains(sha1_expected)) {
+                                number++;
+                                common.writeLog(" Sha1:" + "expected:" + "<" + sha1_expected + "> but was:<" + result_sha1 + ">");
+                            }
                         }
 
-                    }
-                    if (!result_expected.isEmpty()) {
-                        String result_elm = String.format("//tbody/tr[%d]/td[6]/span", m + 1);
-                        String result = driver_searchSample.findElement(By.xpath(result_elm)).getText();
-                        if ((result_expected.equalsIgnoreCase("Malicious")) && ((result.equalsIgnoreCase("Clean")) || (result.equalsIgnoreCase("Analyzing")))) {
-                            number++;
-                            System.out.println("Result actual: " + result + "Result expected:" + result_expected);
+                        if (!result_expected.isEmpty()) {
+                            String result_elm = String.format("//tbody/tr[%d]/td[5]/span", m + 1);
+                            String result = driver_searchSample.findElement(By.xpath(result_elm)).getText();
+                            if ((result_expected.equalsIgnoreCase("Malicious")) && ((result.equalsIgnoreCase("Clean")) || (result.equalsIgnoreCase("Analyzing")))) {
+                                number++;
+                                System.out.println("Result actual: " + result + "Result expected:" + result_expected);
+                                common.writeLog(" Result:" + "expected:" + "<" + result_expected + "> but was:<" + result + ">");
+                            }
+                        }
+                        count_record++;
+                        if (count_record == Integer.parseInt(result_Number_actual)) {
+                            stop = true;
+                            break;
                         }
                     }
-                    count_record++;
-                    if (count_record == n) {
-                        stop = true;
+                    if (stop == true) {
                         break;
                     }
+                    driver_searchSample.findElement(By.xpath("//li/a[@aria-label='Next']")).click();
                 }
-                if(stop==true){
-                    break;
-                }
-                driver_searchSample.findElement(By.xpath("//li/a[@aria-label='Next']")).click();
-            }
                 //Compare ket qua
                 if (number != 0) {
-                    DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-                    LocalDateTime now = LocalDateTime.now();
-                    common.takeSnapShot(driver_searchSample, "D:\\AutoAMA\\search_Sample\\" + _case_ + dtf.format(now) + ".png");
+                    common.takeSnapShot(driver_searchSample, folderName.trim(), _case_);
                 }
                 Assert.assertEquals(0, number);
             }
         }
-}
+    }
