@@ -1,129 +1,153 @@
-package automation.test;
+package test;
 
+import io.cucumber.java.bs.A;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.commons.io.FileUtils;
 import org.junit.Assert;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.chrome.ChromeOptions;
+import org.openqa.selenium.remote.CapabilityType;
+import org.openqa.selenium.remote.DesiredCapabilities;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
+import java.util.Properties;
 
 public class StepDefinitions_sampleInfor {
+
     static WebDriver driver_sampleInfor;
     String sha1;
-    String _case;
+    String _case_;
+    String folderName = "sampleInfor";
     String file_type_;
+
 
     private static boolean flag = false;
 
     @Given("^User Logs In_sampleInformation$")
-    public void userLogsIn_sampleInformation() throws InterruptedException {
-        if(flag==false) {
-            flag=true;
+    public void userLogsIn_sampleInformation() throws InterruptedException, IOException {
+        if (flag == false) {
+            flag = true;
             driver_sampleInfor = common.login_ama(driver_sampleInfor);
+        }
+    }
+
+    @Given("^Choose record sample information as \"([^\"]*)\" and \"([^\"]*)\"$")
+    public void chooseRecord(String _case, String result) throws InterruptedException, IOException {
+        try {
+            _case_ = _case;
+            Thread.sleep(3000);
+//        driver_sampleInfor = common.login_ama(driver_sampleInfor);
+            driver_sampleInfor.findElement(By.cssSelector("a[href='#/samples']")).click();
+
+
+            // chon dieu kien search
+            driver_sampleInfor.findElement(By.cssSelector("ng-select[formcontrolname='malware']")).click();
+            String result_element = String.format("//ng-dropdown-panel//*[contains(text(),'%s')]", result);
+            driver_sampleInfor.findElement(By.xpath(result_element)).click();
+
+            //Click search
+            driver_sampleInfor.findElement(By.cssSelector("button[class^='btn-search']")).click();
+            Thread.sleep(2000);
+            driver_sampleInfor.findElement(By.xpath("//tbody/tr[1]/td[6]/a")).click();
+        } catch (Exception e) {
+            common.writeLog(e.toString());
         }
 
     }
 
-    @Given("^Choose record as \"([^\"]*)\" and \"([^\"]*)\"$")
-    public void chooseRecord(String _case, String result) throws InterruptedException{
-        Thread.sleep(3000);
-//        driver_sampleInfor = common.login_ama(driver_sampleInfor);
-       driver_sampleInfor.findElement(By.cssSelector("a[href='#/samples']")).click();
+    @When("^Click export sample with \"([^\"]*)\"$")
+    public void click_export(String file_type) throws InterruptedException, IOException {
+        try {
 
+            //Thuc hien export file
+            file_type_ = file_type;
+            Thread.sleep(2000);
+            String element_Export;
+            driver_sampleInfor.findElement(By.cssSelector("button[id='btn-export']")).click();
+            if (file_type.equals("html") || file_type.equals("pdf") || file_type.equals("json")) {
+                element_Export = String.format("button[class*='btn-export-%s']", file_type);
+            } else element_Export = String.format("button[class*='btn-export-%s']", file_type);
 
-        // chon dieu kien search
-        driver_sampleInfor.findElement(By.cssSelector("ng-select[formcontrolname='malware']")).click();
-        String result_element = String.format("//ng-dropdown-panel//span[@ng-reflect-ng-item-label='%s']", result);
-        driver_sampleInfor.findElement(By.xpath(result_element)).click();
-
-        //Click search
-        driver_sampleInfor.findElement(By.cssSelector("button[class^='btn-search ml-auto border-none bg-common ng-tns-c174']")).click();
-        Thread.sleep(2000);
-        driver_sampleInfor.findElement(By.xpath("//tbody/tr[1]/td[7]/a")).click();
-
+            driver_sampleInfor.findElement(By.cssSelector(element_Export)).click();
+            sha1 = driver_sampleInfor.findElement(By.cssSelector("#tab-summary .rp__sha1 span")).getText() + ".";
+        } catch (Exception e) {
+            common.writeLog(e.toString());
+        }
     }
 
-    @When("^Click export with \"([^\"]*)\"$")
-    public void click_export(String file_type)throws InterruptedException {
-        //Thuc hien export file
-        file_type_ =file_type;
-        Thread.sleep(2000);
-        String element_Export;
-        driver_sampleInfor.findElement(By.xpath("//button[@id='btn-export']")).click();
-        if(file_type.equals("html") || file_type.equals("pdf")|| file_type.equals("json")){
-         element_Export = String.format("//button[@class='dropdown-item btn-export-%s']", file_type);
-        }else element_Export=String.format("//button[@class='dropdown-item btn-export-%s ng-star-inserted']", file_type);
-
-        driver_sampleInfor.findElement(By.xpath(element_Export)).click();
-        sha1 = driver_sampleInfor.findElement(By.cssSelector("#tab-summary .rp__sha1 span")).getText() +".";
-    }
-
-    @Then("Check result export")
+    @Then("Check result sample export")
     public void Check_export_result() throws InterruptedException, IOException {
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream("Config.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String url_Download = properties.getProperty("url_Download");
+
         //Get list file actual
         Thread.sleep(5000);
-        File folder_actual = new File("C:\\Users\\BoxOffline\\Downloads");
+        File folder_actual = new File(url_Download);
         File[] listOfFiles_actual = folder_actual.listFiles();
-        if (listOfFiles_actual.length!=1) {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-            LocalDateTime now = LocalDateTime.now();
-            common.takeSnapShot(driver_sampleInfor, "D:\\AutoAMA\\sample_Infor\\" + _case + "_" + dtf.format(now) + ".png");
+        if (listOfFiles_actual.length != 1) {
+            common.takeSnapShot(driver_sampleInfor, folderName, _case_);
             FileUtils.cleanDirectory(folder_actual);
         }
         Assert.assertEquals(1, listOfFiles_actual.length);
-        int count_name=0;
+        int count_name = 0;
         Thread.sleep(2000);
-        if (sha1.concat(file_type_).equals(listOfFiles_actual[0].getName()) && listOfFiles_actual[0].length()>0 ) {
+        if (sha1.concat(file_type_).equals(listOfFiles_actual[0].getName()) && listOfFiles_actual[0].length() > 0) {
             count_name++;
         }
-        if(count_name!=1){
-            System.out.println("Actual name:"+ listOfFiles_actual[0].getName());
-            System.out.println("Expected name:"+ (sha1.concat(file_type_)));
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-            LocalDateTime now = LocalDateTime.now();
-            common.takeSnapShot(driver_sampleInfor, "D:\\AutoAMA\\sample_Infor\\" + _case + "_" + dtf.format(now) + ".png");
-            Thread.sleep(1000);
-//            driver_sampleInfor.quit();
+        if (count_name != 1) {
+            common.takeSnapShot(driver_sampleInfor, folderName, _case_);
+            common.writeLog("File name export: expected:" + "<" + sha1.concat(file_type_) + "> but was:<" + listOfFiles_actual[0].getName() + ">");
         }
-        Assert.assertEquals(sha1.concat(file_type_),listOfFiles_actual[0].getName());
+        Assert.assertEquals(sha1.concat(file_type_), listOfFiles_actual[0].getName());
         FileUtils.cleanDirectory(folder_actual);
-//        driver_sampleInfor.quit();
-        }
-    @When("Click download file sample")
-    public void click_download()throws InterruptedException{
-        Thread.sleep(2000);
-        driver_sampleInfor.findElement(By.id("btn-download-sample")).click();
-        sha1 = driver_sampleInfor.findElement(By.cssSelector("#tab-summary .rp__sha1 span")).getText();
     }
 
-    @Then("Check download result")
-    public void check_download_result() throws InterruptedException, IOException{
+    @When("Click download file sample")
+    public void click_download() throws IOException {
+        try {
+            Thread.sleep(2000);
+            driver_sampleInfor.findElement(By.id("btn-download-sample")).click();
+            sha1 = driver_sampleInfor.findElement(By.cssSelector("#tab-summary .rp__sha1 span")).getText();
+        } catch (Exception e) {
+            common.writeLog(e.toString());
+        }
+    }
+
+    @Then("Check download sample result")
+    public void check_download_result() throws InterruptedException, IOException {
         Thread.sleep(1000);
-        String download_FileName= sha1.concat(".zip");
+        String download_FileName = sha1.concat(".zip");
         File folderDownload_actual = new File("C:\\Users\\BoxOffline\\Downloads");
+        File[] listOfFiles_actual = folderDownload_actual.listFiles();
 
         //compare file download
-        boolean status=false;
-        if (folderDownload_actual.getName().equals(download_FileName) && (folderDownload_actual.length() > 0)) {
-           status = true;
+        boolean status = false;
+        if (listOfFiles_actual[0].getName().equals(download_FileName) && (listOfFiles_actual[0].length() > 0)) {
+            status = true;
         }
 
         if (status == false) {
-            DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-            LocalDateTime now = LocalDateTime.now();
-            common.takeSnapShot(driver_sampleInfor, "D:\\AutoAMA\\sample_Infor\\" + _case + dtf.format(now) + ".png");
-            Thread.sleep(1000);
+            common.takeSnapShot(driver_sampleInfor, folderName, _case_);
+            common.writeLog("Name file download: expected:" + "<" + download_FileName + "> but was:<" + listOfFiles_actual[0].getName() + ">");
+            common.writeLog("Size file download: expected:" + "< #0 KB> but was:<" + listOfFiles_actual[0].length() + ">");
         }
-        Assert.assertEquals(true,status);
+        Assert.assertEquals(true, status);
         FileUtils.cleanDirectory(folderDownload_actual);//Delete file sau khi download
+        listOfFiles_actual[0].getName();
     }
-
 }
 
 
