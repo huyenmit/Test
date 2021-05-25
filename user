@@ -1,0 +1,97 @@
+package test;
+
+import io.cucumber.java.en.And;
+import io.cucumber.java.en.Given;
+import io.cucumber.java.en.Then;
+import io.cucumber.java.en.When;
+import org.junit.Assert;
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
+
+import java.io.IOException;
+
+public class StepDefinition_User {
+    static WebDriver driver_User;
+    static boolean flag;
+    String folderName = "User";
+    String user;
+    String _case_;
+
+    @Given("^User Logs In_User$")
+    public void userLogsIn_User() throws InterruptedException, IOException {
+        if (flag == false) {
+            flag = true;
+            driver_User = common.login_ama(driver_User);
+        }
+    }
+
+    @When("^Check exit user with \"([^\"]*)\"$")
+    public void checkExitUser(String userName) throws InterruptedException, IOException {
+        //Open man hinh tao moi user
+        new WebDriverWait(driver_User, 20).until(ExpectedConditions.elementToBeClickable(By.id("admin-menu"))).click();
+        new WebDriverWait(driver_User, 20).until(ExpectedConditions.elementToBeClickable(By.cssSelector("a[href='#/admin/users']"))).click();
+        //input thong tin username
+        driver_User.findElement(By.cssSelector("input[formcontrolname='user']")).clear();
+        driver_User.findElement(By.cssSelector("input[formcontrolname='user']")).sendKeys(userName);
+        driver_User.findElement(By.cssSelector("button[class^='btn-search']")).click();
+        Thread.sleep(1000);
+
+        user = userName;
+        String result = driver_User.findElement(By.xpath("//app-table-footer/div/span[1]")).getText();
+        if (Integer.parseInt(result) != 0) {
+            common.takeSnapShot(driver_User, folderName, _case_);
+            common.writeLog("Check exit user:" + "expected:" + "<" + 0 + "> but was:<" + Integer.parseInt(result) + ">");
+        }
+        Assert.assertEquals(0, Integer.parseInt(result));
+    }
+
+    @When("^Create user \"([^\"]*)\" with \"([^\"]*)\"$")
+    public void create_User(String _case, String pass) throws InterruptedException, IOException {
+        try {
+            _case_ = _case;
+            driver_User.findElement(By.cssSelector("button[class^='btn-create']")).click();
+            Thread.sleep(1000);
+            driver_User.findElement(By.cssSelector("input[formcontrolname='username']")).sendKeys(user);
+            Thread.sleep(500);
+            driver_User.findElement(By.cssSelector("input[formcontrolname='password']")).sendKeys(pass);
+            Thread.sleep(500);
+            driver_User.findElement(By.cssSelector("input[formcontrolname='confirmPassword']")).sendKeys(pass);
+            Thread.sleep(500);
+            driver_User.findElement(By.cssSelector("button[class='btn btn-primary mr-2']")).click();
+        } catch (Exception e) {
+            common.writeLog(e.toString());
+        }
+    }
+
+    @Then("^Check create success$")
+    public void searchUser() throws IOException, InterruptedException {
+        //input thong tin username
+        driver_User.findElement(By.cssSelector("input[formcontrolname='user']")).clear();
+        driver_User.findElement(By.cssSelector("input[formcontrolname='user']")).sendKeys(user);
+        Thread.sleep(500);
+        driver_User.findElement(By.cssSelector("button[class^='btn-search']")).click();
+        Thread.sleep(500);
+        String result = driver_User.findElement(By.xpath("//app-table-footer/div/span[1]")).getText();
+        if (Integer.parseInt(result) != 1) {
+            common.takeSnapShot(driver_User, folderName, _case_);
+            common.writeLog("Count user create success:" + "expected:" + "<" + 1 + "> but was:<" + Integer.parseInt(result) + ">");
+        }
+        Assert.assertEquals(1, Integer.parseInt(result));
+    }
+
+    @And("^Delete user$")
+    public void delete_user() throws InterruptedException, IOException {
+
+        driver_User.findElement(By.xpath("//tbody/tr[1]/td[6]/button[2]")).click();
+        driver_User.findElement(By.cssSelector("button[class='btn btn-primary mr-2']")).click();
+        Thread.sleep(1000);
+        String result = driver_User.findElement(By.xpath("//app-table-footer/div/span[1]")).getText();
+        if (Integer.parseInt(result) != 0) {
+            common.takeSnapShot(driver_User, folderName, _case_);
+            common.writeLog("Check delete user:" + "expected:" + "<" + 0 + "> but was:<" + Integer.parseInt(result) + ">");
+        }
+        Assert.assertEquals(0, Integer.parseInt(result));
+    }
+}
