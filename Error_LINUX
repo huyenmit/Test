@@ -1,0 +1,70 @@
+root@naptjknode:/home/napt/ama-automation/src/main/resources/automation/test# java -Dwebdriver.chrome.driver=/home/napt/ama-automation/SeleniumWebdriver/chromedriver_linux64_test/chromedriver -jar AdvancedMalwareAnalysis.jar 
+May 31, 2021 6:50:18 PM io.cucumber.core.cli.Main run
+WARNING: By default Cucumber is running in --non-strict mode.
+This default will change to --strict and --non-strict will be removed.
+You can use --strict to suppress this warning
+May 31, 2021 6:50:18 PM org.openqa.selenium.remote.DesiredCapabilities chrome
+INFO: Using `new ChromeOptions()` is preferred to `DesiredCapabilities.chrome()`
+May 31, 2021 6:50:19 PM org.openqa.selenium.remote.ProtocolHandshake createSession
+INFO: Detected dialect: W3C
+F---.F--.F--.F--.F--.F--.F--
+
+Failed scenarios:
+file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:9# Test search Sample
+file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:10# Test search Sample
+file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:11# Test search Sample
+file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:12# Test search Sample
+file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:13# Test search Sample
+file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:14# Test search Sample
+file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:15# Test search Sample
+
+7 Scenarios (7 failed)
+28 Steps (7 failed, 15 skipped, 6 passed)
+0m1.798s
+
+
+org.openqa.selenium.WebDriverException: unknown error: net::ERR_CONNECTION_REFUSED
+  (Session info: chrome=90.0.4430.85)
+Build info: version: 'unknown', revision: 'unknown', time: 'unknown'
+System info: host: 'naptjknode', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '5.4.0-73-generic', java.version: '11.0.8'
+Driver info: org.openqa.selenium.remote.RemoteWebDriver
+Capabilities {acceptInsecureCerts: false, browserName: chrome, browserVersion: 90.0.4430.85, chrome: {chromedriverVersion: 90.0.4430.24 (4c6d850f087da..., userDataDir: /tmp/.com.google.Chrome.cbHyKV}, goog:chromeOptions: {debuggerAddress: localhost:35497}, javascriptEnabled: true, networkConnectionEnabled: false, pageLoadStrategy: normal, platform: LINUX, platformName: LINUX, proxy: Proxy(), setWindowRect: true, strictFileInteractability: false, timeouts: {implicit: 0, pageLoad: 300000, script: 30000}, unhandledPromptBehavior: dismiss and notify, webauthn:extension:largeBlob: true, webauthn:virtualAuthenticators: true, webdriver.remote.sessionid: fdd78b4b5ce6c809f716ae5b0dd...}
+Session ID: fdd78b4b5ce6c809f716ae5b0ddcfaf5
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance0(Native Method)
+	at java.base/jdk.internal.reflect.NativeConstructorAccessorImpl.newInstance(NativeConstructorAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingConstructorAccessorImpl.newInstance(DelegatingConstructorAccessorImpl.java:45)
+	at java.base/java.lang.reflect.Constructor.newInstance(Constructor.java:490)
+	at org.openqa.selenium.remote.http.W3CHttpResponseCodec.createException(W3CHttpResponseCodec.java:187)
+	at org.openqa.selenium.remote.http.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:122)
+	at org.openqa.selenium.remote.http.W3CHttpResponseCodec.decode(W3CHttpResponseCodec.java:49)
+	at org.openqa.selenium.remote.HttpCommandExecutor.execute(HttpCommandExecutor.java:160)
+	at org.openqa.selenium.remote.RemoteWebDriver.execute(RemoteWebDriver.java:601)
+	at org.openqa.selenium.remote.RemoteWebDriver.get(RemoteWebDriver.java:325)
+	at org.openqa.selenium.remote.RemoteWebDriver$RemoteNavigation.to(RemoteWebDriver.java:912)
+	at test.common.login_ama(common.java:61)
+	at test.StepDefinitions_searchSample.userLogsIn_searchSample(StepDefinitions_searchSample.java:33)
+	at ✽.User Logs In_searchSample(file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:3)
+
+java.lang.NullPointerException
+	at test.StepDefinitions_searchSample.seachSample(StepDefinitions_searchSample.java:40)
+	at ✽.input condition sample with "case_2", "", "", "c__browse_browse.bin", "" and ""(file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:4)
+
+java.lang.NullPointerException
+	at test.StepDefinitions_searchSample.seachSample(StepDefinitions_searchSample.java:40)
+	at ✽.input condition sample with "case_3", "", "", "", "3afd555de08390b8076dd1446538d3187d188dda" and ""(file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:4)
+
+java.lang.NullPointerException
+	at test.StepDefinitions_searchSample.seachSample(StepDefinitions_searchSample.java:40)
+	at ✽.input condition sample with "case_4", "", "", "bin", "" and "malicious"(file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:4)
+
+java.lang.NullPointerException
+	at test.StepDefinitions_searchSample.seachSample(StepDefinitions_searchSample.java:40)
+	at ✽.input condition sample with "case_5", "", "", "bin", "" and "clean"(file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:4)
+
+java.lang.NullPointerException
+	at test.StepDefinitions_searchSample.seachSample(StepDefinitions_searchSample.java:40)
+	at ✽.input condition sample with "case_6", "", "", "login.php", "2084569a43439968500aa44ac03ce37437d12bb4" and ""(file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:4)
+
+java.lang.NullPointerException
+	at test.StepDefinitions_searchSample.seachSample(StepDefinitions_searchSample.java:40)
+	at ✽.input condition sample with "case_7", "", "", "sampleffffffffffffffff", "" and "clean"(file:///home/napt/ama-automation/src/main/resources/automation/test/searchSample.feature:4)
