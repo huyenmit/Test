@@ -1,0 +1,59 @@
+Error_public class common {
+    public static WebDriver login_ama( WebDriver driver) throws InterruptedException, IOException {
+        //Read file properties
+        Properties properties = new Properties();
+        try {
+            properties.load(new FileInputStream("Config.properties"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String dName = properties.getProperty("driverName");
+        String dUrl = properties.getProperty("driverUrl");
+        String url = properties.getProperty("urlLogin");
+        String uName = properties.getProperty("userName");
+        String pwd = properties.getProperty("password");
+        String url_Download = properties.getProperty("url_Download");
+        System.setProperty(dName, dUrl);
+
+        //Check exit folder download
+        File f = new File(url_Download);
+        if (!f.exists()) {
+            f.createNewFile();
+        }
+        //Setting duong dan download default
+        String downloadFilepath = url_Download;
+        HashMap<String, Object> chromePrefs = new HashMap<String, Object>();
+        chromePrefs.put("profile.default_content_settings.popups", 0);
+        chromePrefs.put("download.default_directory", downloadFilepath);
+
+        ChromeOptions options = new ChromeOptions();
+        options.addArguments("--start-maximized");
+        options.addArguments("--no-sandbox");
+        options.addArguments("--remote-debugging-port=9222");
+        options.addArguments("--headless");
+        options.addArguments("--disable-dev-shm-usage");
+        options.addArguments("--disable-gpu");
+
+        options.setExperimentalOption("prefs", chromePrefs);
+        DesiredCapabilities cap = DesiredCapabilities.chrome();
+        cap.setCapability(CapabilityType.ACCEPT_SSL_CERTS, true);
+        cap.setCapability(ChromeOptions.CAPABILITY, options);
+        driver = new ChromeDriver(cap);
+
+        //Open link url
+        driver.navigate().to(url);
+        driver.manage().window().maximize();
+        if(driver.findElements(By.id("details-button")).size()==1) {
+            driver.findElement(By.id("details-button")).click();
+            driver.findElement(By.id("proceed-link")).click();
+        }
+
+
+
+        //input user, pass
+        driver.findElement(By.cssSelector("input[name='username']")).sendKeys(uName);
+        driver.findElement(By.cssSelector("input[name='password']")).sendKeys(pwd);
+        driver.findElement(By.id("btn-login")).click();
+        Thread.sleep(1000);
+        return driver;
+    }
