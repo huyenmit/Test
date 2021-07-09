@@ -88,3 +88,7 @@ java.lang.NullPointerException
 	
 	
 	
+	
+	org.openqa.selenium.remote.UnreachableBrowserException: Could not start a new session. Possible causes are invalid address of the remote server or browser start-up failure.
+Build info: version: 'unknown', revision: 'unknown', time: 'unknown'
+System info: host: 'naptjknode', ip: '127.0.1.1', os.name: 'Linux', os.arch: 'amd64', os.version: '5.4.0-77-generic', java.version: '11.0.8'
