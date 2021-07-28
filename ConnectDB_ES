@@ -1,0 +1,7 @@
+ private static final Logger log = LoggerFactory.getLogger(ElasticsearchClient.class);
+    private final RestHighLevelClient client;
+
+
+    public ConnectDB(ElasticsearchClient elasticsearchConfig) {
+        client = new RestHighLevelClient(RestClient.builder(new HttpHost("localhost", 9200, "http")));
+    }
