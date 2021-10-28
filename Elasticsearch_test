@@ -1,0 +1,50 @@
+//Search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "qtype2": "answer"
+          }
+        },
+        {
+          "range": {
+            "_create_time_str": {
+              "gt": "2020-05-04T11:38:00",
+              "lt": "2020-05-04T11:40:29"
+            }
+          }
+        }
+      ],
+      "must_not": [],
+      "should": []
+    }
+  }
+}
+
+//sort
+{
+  "sort": [
+    {
+      "time": "desc"
+    }
+  ]
+}
+
+{
+  "sort": [
+    {
+      "time": "desc"
+    }
+  ],
+  "from": 0,
+  "size": 100
+}
+//update 1 feald
+http://localhost:9202/napt-log-20211028/event//id
+_update  POST
+{"doc":{
+"ten_truong":"value"
+}
+}
