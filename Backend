@@ -1,0 +1,1 @@
+Đẩy mẫu quét -> Sandbox sinh file dump, file drop, screen captrue, pcap tại đường dẫn Setting trên sandbox-> Các file được sinh ra được lưu trên server /opt/ama/data/artifact/<sha1>/<artifact_type>/<ip>-> Server đẩy vào DB -> DB đẩy lên portal
