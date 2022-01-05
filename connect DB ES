@@ -1,0 +1,71 @@
+package esg.util;
+import org.apache.http.HttpHost;
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RestClient;
+import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.builder.SearchSourceBuilder;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+
+import static org.elasticsearch.index.query.QueryBuilders.boolQuery;
+
+public class ConnectDB {
+    private static final String HOST = "10.255.250.243";
+    private static final int PORT_ONE = 9200;
+    private static final int PORT_TWO = 9201;
+    private static final String SCHEME = "http";
+
+    private static RestHighLevelClient restHighLevelClient;
+
+
+    private static final String INDEX = "naptm-log-sensor-*";
+    private static final String TYPE = "event";
+
+    public static synchronized RestHighLevelClient makeConnection() {
+
+        if(restHighLevelClient == null) {
+            restHighLevelClient = new RestHighLevelClient(
+                    RestClient.builder(
+                            new HttpHost(HOST, PORT_ONE, SCHEME),
+                            new HttpHost(HOST, PORT_TWO, SCHEME)));
+        }
+
+        return restHighLevelClient;
+    }
+    public static synchronized void closeConnection() throws IOException {
+        restHighLevelClient.close();
+        restHighLevelClient = null;
+    }
+
+
+
+    public static long  test() throws  IOException{
+        makeConnection();
+//        Calendar c = Calendar.getInstance();
+//        TimeZone tz = c.getTimeZone();
+//        ZoneId zone = tz.toZoneId();
+//        System.out.println(zone);
+        LocalDate today = LocalDate.now();
+        LocalDate yesterday = today.minusDays(1);
+        long timestamp = System.currentTimeMillis();
+
+//        LocalDateTime starttime = yesterday.atStartOfDay();
+        LocalDateTime endtime = LocalDateTime.of(yesterday, LocalTime.MAX);
+        LocalDateTime starttime = LocalDateTime.of(yesterday, LocalTime.MIN);
+        final BoolQueryBuilder boolBuilder = boolQuery();
+        boolBuilder.must(QueryBuilders.rangeQuery("@timestamp").from(starttime).timeZone("+07:00").to(endtime).timeZone("+07:00"));
+        SearchRequest searchRequest = new SearchRequest(INDEX).types(TYPE).source(new SearchSourceBuilder().query(boolBuilder));
+//        System.out.println(searchRequest);
+        SearchResponse searchResponse = restHighLevelClient.search(searchRequest);
+        long total = searchResponse.getHits().getTotalHits();
+        System.out.println("\n Total alert in database is: " + total);
+        closeConnection();
+        return total;
+    }
+}
